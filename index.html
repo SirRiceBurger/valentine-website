@@ -1,39 +1,153 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Valentine's Day</title>
-    <style>
-        body {
-            background-color: #ffccd5;
-            color: #8b0000;
-            font-family: 'Arial', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-            text-align: center;
-            flex-direction: column;
-        }
-        h1 {
-            font-size: 3em;
-            margin-bottom: 20px;
-        }
-        .heart {
-            font-size: 5em;
-            color: red;
-            animation: heartbeat 1s infinite;
-        }
-        @keyframes heartbeat {
-            0%, 100% { transform: scale(1); }
-            50% { transform: scale(1.2); }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <title>Valentine Crossword Puzzle</title>
+  <style>
+    body {
+      background-color: #ffe6e6;
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+    }
+    h1 {
+      color: #d6336c;
+    }
+    table {
+      margin: 0 auto;
+      border-collapse: collapse;
+    }
+    td {
+      width: 40px;
+      height: 40px;
+      border: 1px solid #333;
+      position: relative;
+    }
+    /* Black cells for unused areas */
+    td.black {
+      background-color: #333;
+    }
+    td input {
+      width: 100%;
+      height: 100%;
+      text-align: center;
+      font-size: 24px;
+      border: none;
+      outline: none;
+      text-transform: uppercase;
+    }
+    /* Optional: mark correct letters in green */
+    td input.correct {
+      background-color: #c8e6c9;
+    }
+    .clues {
+      margin-top: 20px;
+      text-align: left;
+      max-width: 600px;
+      margin-left: auto;
+      margin-right: auto;
+    }
+  </style>
 </head>
 <body>
-    <h1>Will You Be My Valentine?</h1>
-    <div class="heart">❤️</div>
+  <h1>Valentine Crossword Puzzle</h1>
+  <div id="crossword"></div>
+  <button onclick="checkAnswers()">Check Answers</button>
+  
+  <div class="clues">
+    <h2>Clues</h2>
+    <p><strong>1-Across:</strong> (Row 2) Fill in “I LOVE” (from left to right).</p>
+    <p><strong>2-Down:</strong> (Column 3) Fill in “YOU” (from top to bottom).</p>
+    <p><strong>3-Down:</strong> (Column 4) Fill in “VALENTINES” (from row 2 to row 11).</p>
+    <p><strong>4-Across:</strong> (Row 8) Fill in “I MISS YOU” (from left to right).</p>
+  </div>
+  
+  <script>
+    // The grid is 11 rows x 10 columns.
+    // Cells with a letter are part of a word; cells with null are black.
+    // Rows are represented as arrays.
+    const gridData = [
+      // Row 1 (index 0): Only column 3 is used: 'Y' (first letter of "YOU")
+      [null, null, 'Y', null, null, null, null, null, null, null],
+      // Row 2 (index 1): "I LOVE" horizontally
+      ['I', 'L', 'O', 'V', 'E', null, null, null, null, null],
+      // Row 3 (index 2): "YOU" vertical gives letter 'U' at col3; plus column 4 is used for VALENTINES.
+      [null, null, 'U', 'A', null, null, null, null, null, null],
+      // Row 4 (index 3): Only column 4: 'L' (from VALENTINES)
+      [null, null, null, 'L', null, null, null, null, null, null],
+      // Row 5 (index 4): Only column 4: 'E'
+      [null, null, null, 'E', null, null, null, null, null, null],
+      // Row 6 (index 5): Only column 4: 'N'
+      [null, null, null, 'N', null, null, null, null, null, null],
+      // Row 7 (index 6): Only column 4: 'T'
+      [null, null, null, 'T', null, null, null, null, null, null],
+      // Row 8 (index 7): "I MISS YOU" horizontally from columns 2 to 9
+      [null, 'I', 'M', 'I', 'S', 'S', 'Y', 'O', 'U', null],
+      // Row 9 (index 8): Only column 4: 'N'
+      [null, null, null, 'N', null, null, null, null, null, null],
+      // Row 10 (index 9): Only column 4: 'E'
+      [null, null, null, 'E', null, null, null, null, null, null],
+      // Row 11 (index 10): Only column 4: 'S'
+      [null, null, null, 'S', null, null, null, null, null, null]
+    ];
+    
+    const numRows = gridData.length;
+    const numCols = gridData[0].length;
+    
+    // Create the crossword grid as an HTML table.
+    function createCrossword() {
+      const crosswordDiv = document.getElementById('crossword');
+      const table = document.createElement('table');
+      
+      for (let r = 0; r < numRows; r++) {
+        const tr = document.createElement('tr');
+        for (let c = 0; c < numCols; c++) {
+          const td = document.createElement('td');
+          if (gridData[r][c] === null) {
+            td.classList.add('black');
+          } else {
+            const input = document.createElement('input');
+            input.setAttribute('maxlength', '1');
+            input.dataset.row = r;
+            input.dataset.col = c;
+            td.appendChild(input);
+          }
+          tr.appendChild(td);
+        }
+        table.appendChild(tr);
+      }
+      crosswordDiv.appendChild(table);
+    }
+    
+    // Check the user's answers against gridData.
+    function checkAnswers() {
+      let correctCount = 0;
+      let totalCount = 0;
+      const inputs = document.querySelectorAll('td input');
+      
+      inputs.forEach(input => {
+        const r = input.dataset.row;
+        const c = input.dataset.col;
+        const correctLetter = gridData[r][c];
+        totalCount++;
+        if (input.value.toUpperCase() === correctLetter) {
+          input.classList.add('correct');
+          correctCount++;
+        } else {
+          input.classList.remove('correct');
+        }
+      });
+      
+      if (correctCount === totalCount) {
+        alert("Congratulations! You've solved the crossword!");
+        // Optionally, trigger the next step (for example, reveal a hidden Valentine message)
+      } else {
+        alert(`You got ${correctCount} out of ${totalCount} letters correct. Keep trying!`);
+      }
+    }
+    
+    // Initialize the crossword puzzle when the page loads.
+    createCrossword();
+  </script>
 </body>
 </html>
